@@ -1,6 +1,6 @@
 local options = {
     fts = { 'markdown', 'text' },
-    logging = false,
+    confirm = { browser = true, new_file = true, open_file = false },
 }
 
 local M = {}
