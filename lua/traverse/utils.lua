@@ -48,13 +48,13 @@ local function is_between_brackets()
     return bitmask[col + 1] == 1
 end
 
-local M = {}
+local Utils = {}
 
-M.is_link = function(path) ---@param path string
+function Utils.is_link(path) ---@param path string
     return path:sub(0, 4) == 'http'
 end
 
-M.file_exists = function(name) ---@param name string
+function Utils.file_exists(name) ---@param name string
     local file = io.open(name, 'r')
     local exists = file ~= nil
     if exists then
@@ -64,7 +64,7 @@ M.file_exists = function(name) ---@param name string
 end
 
 --Returns `true` if finding a link was successful, otherwise `false`
-M.go_to_markdown_link = function()
+function Utils.go_to_markdown_link()
     if is_between_brackets() then
         return go_to_parenthesis()
     end
@@ -73,7 +73,7 @@ M.go_to_markdown_link = function()
 end
 
 --Determines if the filetype of the current buffer is in the provided table
-M.in_filetype = function()
+function Utils.in_filetype()
     local current_ft = vim.o.filetype
 
     for _, ft in ipairs(opts.get().fts) do
@@ -85,44 +85,44 @@ M.in_filetype = function()
     return false
 end
 
-M.get_cursor_file = function() ---@return string
+function Utils.get_cursor_file() ---@return string
     return vim.fn.expand '<cfile>'
 end
 
-M.get_file_path = function() ---@return string
-    return './' .. vim.fn.expand '%:h' .. '/' .. M.get_cursor_file()
+function Utils.get_file_path() ---@return string
+    return './' .. vim.fn.expand '%:h' .. '/' .. Utils.get_cursor_file()
 end
 
-M.open_file = function(path)
+function Utils.open_file(path) ---@param path string
     vim.cmd('e ' .. path)
 end
 
-M.open_in_browser = function(link) ---@param link string
+function Utils.open_in_browser(link) ---@param link string
     local cmd = 'open'
     cmd = cmd .. ' ' .. link
     vim.fn.jobstart(cmd)
 end
 
-M.is_on_checkbox = function()
+function Utils.is_on_checkbox()
     local line = vim.api.nvim_get_current_line()
     return line:sub(1, 3) == '- [' and line:sub(5, 5) == ']'
 end
 
-M.checkbox_is_checked = function()
+function Utils.checkbox_is_checked()
     local line = vim.api.nvim_get_current_line()
-    return M.is_on_checkbox() and line:sub(1, 5) == '- [x]'
+    return Utils.is_on_checkbox() and line:sub(1, 5) == '- [x]'
 end
 
-M.toggle_checkbox = function()
-    if not M.is_on_checkbox() then
+local function input(keys) ---@param keys string
+    vim.api.nvim_feedkeys(keys, 'n', true)
+end
+
+function Utils.toggle_checkbox()
+    if not Utils.is_on_checkbox() then
         return
     end
 
-    if M.checkbox_is_checked() then
-        vim.api.nvim_feedkeys('mz_f[lr `z', 'n', true)
-    else
-        vim.api.nvim_feedkeys('mz_f[lrx`z', 'n', true)
-    end
+    if Utils.checkbox_is_checked() then input('mz_f[lr `z') else input('mz_f[lrx`z') end
 end
 
-return M
+return Utils

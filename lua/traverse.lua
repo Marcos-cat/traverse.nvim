@@ -6,6 +6,7 @@ local cmds = {
 
 local M = {}
 
+---@param opts TraverseOpts?
 M.setup = function(opts)
     require('traverse.options').set(opts or {})
 

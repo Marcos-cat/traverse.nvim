@@ -1,9 +1,9 @@
 local u = require 'traverse.utils'
 local ask = require 'traverse.ask'
 
-local M = {}
+local Traverse = {}
 
-M.traverse = function()
+function Traverse.traverse()
     u.go_to_markdown_link()
 
     if not u.in_filetype() then
@@ -32,4 +32,4 @@ M.traverse = function()
     end
 end
 
-return M
+return Traverse
