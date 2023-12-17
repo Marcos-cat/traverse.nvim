@@ -1,4 +1,4 @@
-local Opts = require 'traverse.options'
+local Opts = require('traverse.options').get()
 
 local Utils = {}
 
@@ -145,7 +145,7 @@ end
 function Utils.in_filetype()
     local current_ft = vim.o.filetype
 
-    for _, ft in ipairs(Opts.get().fts) do
+    for _, ft in ipairs(Opts.fts) do
         if ft == current_ft then
             return true
         end

@@ -2,7 +2,7 @@
 
 Traverse your wiki with one command
 
-- *Problem*: Markdown links are complicated.
+- *Problem*: Markdown links are complicated (`gf` doesn't always work).
 - *Solution*: Encapsulate all the behavior in a single command - `Traverse`
 
 ## ✨ Features

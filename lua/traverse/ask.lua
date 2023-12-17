@@ -1,8 +1,8 @@
 local Ask = {}
-local Opts = require 'traverse.options'
+local Opts = require('traverse.options').get()
 
 Ask.confirm_open_browser = function()
-    if not Opts.get().confirm.browser then
+    if Opts.confirm.browser == false then
         return true
     end
 
@@ -15,7 +15,7 @@ end
 
 ---@param name string
 Ask.confirm_new_file = function(name)
-    if not Opts.get().confirm.new_file then
+    if Opts.confirm.new_file == false then
         return true
     end
 
@@ -28,7 +28,7 @@ end
 
 ---@param name string
 Ask.confirm_open_file = function(name)
-    if not Opts.get().confirm.open_file then
+    if Opts.confirm.open_file == false then
         return true
     end
 

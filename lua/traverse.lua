@@ -8,7 +8,7 @@ local M = {}
 
 ---@param opts TraverseOpts?
 M.setup = function(opts)
-    require('traverse.options').set(opts or {})
+    require('traverse.options').set(opts)
 
     for cmd, func in pairs(cmds) do
         vim.api.nvim_create_user_command(cmd, func, {})

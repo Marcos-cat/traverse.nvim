@@ -1,20 +1,22 @@
 ---@class TraverseOpts
 ---@field fts? string[]
----@field confirm? table<string, boolean>
+---@field confirm? {browser?: boolean, new_file?: boolean, open_file?: boolean}
 local TraverseOpts = {
     fts = { 'markdown', 'text' },
-    confirm = { browser = true, new_file = true, open_file = false },
+    confirm = {
+        browser = true,
+        new_file = true,
+        open_file = false,
+    },
 }
 
-local M = {}
+return {
+    get = function()
+        return TraverseOpts
+    end,
 
----@param opts TraverseOpts
-function M.set(opts)
-    TraverseOpts = vim.tbl_deep_extend('force', TraverseOpts, opts)
-end
-
-M.get = function()
-    return TraverseOpts
-end
-
-return M
+    ---@param val TraverseOpts?
+    set = function(val)
+        TraverseOpts = vim.tbl_deep_extend('force', TraverseOpts, val or {})
+    end,
+}
