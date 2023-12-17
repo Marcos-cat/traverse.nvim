@@ -1,8 +1,8 @@
-local M = {}
-local opts = require 'traverse.options'
+local Ask = {}
+local Opts = require 'traverse.options'
 
-M.confirm_open_browser = function()
-    if not opts.get().confirm.browser then
+Ask.confirm_open_browser = function()
+    if not Opts.get().confirm.browser then
         return true
     end
 
@@ -13,8 +13,9 @@ M.confirm_open_browser = function()
     ) == 1
 end
 
-M.confirm_new_file = function(name) ---@param name string
-    if not opts.get().confirm.new_file then
+---@param name string
+Ask.confirm_new_file = function(name)
+    if not Opts.get().confirm.new_file then
         return true
     end
 
@@ -25,8 +26,9 @@ M.confirm_new_file = function(name) ---@param name string
     ) == 1
 end
 
-M.confirm_open_file = function(name) ---@param name string
-    if not opts.get().confirm.open_file then
+---@param name string
+Ask.confirm_open_file = function(name)
+    if not Opts.get().confirm.open_file then
         return true
     end
 
@@ -37,4 +39,4 @@ M.confirm_open_file = function(name) ---@param name string
     ) == 1
 end
 
-return M
+return Ask

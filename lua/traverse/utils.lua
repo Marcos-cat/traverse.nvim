@@ -1,6 +1,9 @@
-local opts = require 'traverse.options'
+local Opts = require 'traverse.options'
 
-local function scanadd(arr) ---@param arr integer[]
+local Utils = {}
+
+---@param arr integer[]
+local function scanadd(arr)
     for i, val in ipairs(arr) do
         if i ~= 1 then
             arr[i] = val + arr[i - 1]
@@ -29,7 +32,8 @@ local function is_between_brackets()
     local col = vim.api.nvim_win_get_cursor(vim.api.nvim_get_current_win())[2]
     local line = vim.api.nvim_get_current_line()
 
-    local bitmask = {} ---@type integer[]
+    ---@type integer[]
+    local bitmask = {}
 
     for i = 1, #line do
         local c = line:sub(i, i)
@@ -48,14 +52,79 @@ local function is_between_brackets()
     return bitmask[col + 1] == 1
 end
 
-local Utils = {}
+---@param str string
+---@return string
+local function to_letters(str)
+    local alphabet = 'qwertyuiopasdfghjklzxcvbnm'
+    str = str:lower()
 
-function Utils.is_link(path) ---@param path string
-    return path:sub(0, 4) == 'http'
+    local out = ''
+
+    for i = 1, #str do
+        local letter = str:sub(i, i)
+
+        if alphabet:find(letter, nil, true) ~= nil then
+            out = out .. letter
+        end
+    end
+
+    return out
 end
 
-function Utils.file_exists(name) ---@param name string
-    local file = io.open(name, 'r')
+---@param text string
+function Utils.is_heading(text)
+    return text:sub(1, 1) == '#'
+end
+
+---@param heading_id string should include the `#` i.e. use `#my-heading` not `my-heading`
+---@return boolean if finding the heading was successful
+function Utils.go_to_heading(heading_id)
+    heading_id = heading_id:sub(2)
+
+    local headings = Utils.get_all_headings()
+
+    for _, val in ipairs(headings) do
+        if to_letters(val.heading) == to_letters(heading_id) then
+            local win = vim.api.nvim_get_current_win()
+            vim.api.nvim_win_set_cursor(win, { val.linenr, 0 })
+
+            return true
+        end
+    end
+
+    return false
+end
+
+function Utils.get_all_headings()
+    local buf = vim.api.nvim_get_current_buf()
+    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+
+    ---@type { heading: string, linenr: integer }[]
+    local headings = {}
+
+    for linenr, line in ipairs(lines) do
+        if line:sub(1, 1) == '#' then
+            local space = line:find ' '
+
+            if space ~= nil then
+                local heading = line:sub(space + 1)
+
+                headings[#headings + 1] = { heading = heading, linenr = linenr }
+            end
+        end
+    end
+
+    return headings
+end
+
+---@param path string
+function Utils.is_url(path)
+    return path:sub(1, 4) == 'http'
+end
+
+---@param path string
+function Utils.file_exists(path)
+    local file = io.open(path, 'r')
     local exists = file ~= nil
     if exists then
         io.close(file)
@@ -76,7 +145,7 @@ end
 function Utils.in_filetype()
     local current_ft = vim.o.filetype
 
-    for _, ft in ipairs(opts.get().fts) do
+    for _, ft in ipairs(Opts.get().fts) do
         if ft == current_ft then
             return true
         end
@@ -85,19 +154,23 @@ function Utils.in_filetype()
     return false
 end
 
-function Utils.get_cursor_file() ---@return string
+---@return string
+function Utils.get_cursor_file()
     return vim.fn.expand '<cfile>'
 end
 
-function Utils.get_file_path() ---@return string
+---@return string
+function Utils.get_file_path()
     return './' .. vim.fn.expand '%:h' .. '/' .. Utils.get_cursor_file()
 end
 
-function Utils.open_file(path) ---@param path string
+---@param path string
+function Utils.open_file(path)
     vim.cmd('e ' .. path)
 end
 
-function Utils.open_in_browser(link) ---@param link string
+---@param link string
+function Utils.open_in_browser(link)
     local cmd = 'open'
     cmd = cmd .. ' ' .. link
     vim.fn.jobstart(cmd)
@@ -113,7 +186,8 @@ function Utils.checkbox_is_checked()
     return Utils.is_on_checkbox() and line:sub(1, 5) == '- [x]'
 end
 
-local function input(keys) ---@param keys string
+---@param keys string
+local function input(keys)
     vim.api.nvim_feedkeys(keys, 'n', true)
 end
 
@@ -122,7 +196,11 @@ function Utils.toggle_checkbox()
         return
     end
 
-    if Utils.checkbox_is_checked() then input('mz_f[lr `z') else input('mz_f[lrx`z') end
+    if Utils.checkbox_is_checked() then
+        input 'mz_f[lr `z'
+    else
+        input 'mz_f[lrx`z'
+    end
 end
 
 return Utils

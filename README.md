@@ -9,7 +9,9 @@ Traverse your wiki with one command
 
 - [x] Open web links and file links with the same command
 - [x] Navigate while on any part of the Markdown link
-- [x] Toggle Markdown checkboxes
+- [x] [Toggle Markdown checkboxes](#toggle-checkboxes)
+- [x] Navigate Markdown Section links
+- [ ] Navigate Markdown Reference links
 
 ## 📦 Install
 
@@ -31,7 +33,7 @@ Traverse your wiki with one command
   require('traverse').setup{}
   ```
 
-- `:Traverse` Call this command to *traverse* Markdown
+- `:Traverse` Call this command to *traverse* markdown
 
 ## API Commands
 
@@ -39,8 +41,10 @@ Traverse your wiki with one command
 local utils = require 'traverse.utils'
 ```
 
-- `utils.toggle_checkbox()` will toggle a markdown checkbox on the current line
-  if there is one.
+### Toggle Checkboxes
+
+`utils.toggle_checkbox()` will toggle a markdown checkbox on the current line if
+there is one.
 
 ## Options
 
