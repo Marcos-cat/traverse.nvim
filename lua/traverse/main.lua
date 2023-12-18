@@ -4,7 +4,9 @@ local Ask = require 'traverse.ask'
 local Traverse = {}
 
 function Traverse.traverse()
-    Utils.go_to_markdown_link()
+    local win = vim.api.nvim_get_current_win()
+
+    Utils.go_to_markdown_link(win)
 
     if not Utils.in_filetype() then
         return
@@ -32,7 +34,7 @@ function Traverse.traverse()
     if Utils.is_heading(link_name) then
         local heading_id = link_name
 
-        if Utils.go_to_heading(heading_id) then
+        if Utils.go_to_heading(heading_id, win) then
             return
         end
     end

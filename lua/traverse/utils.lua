@@ -13,25 +13,27 @@ local function scanadd(arr)
     return arr
 end
 
-local function go_to_parenthesis()
-    local win = vim.api.nvim_get_current_win()
-    local pos = vim.api.nvim_win_get_cursor(win)
+---@param line string
+---@param win integer
+---@param pos integer[]
+---@return boolean
+local function go_to_parenthesis(line, win, pos)
     local col = pos[2]
-    local line = vim.api.nvim_get_current_line()
 
-    local paren_i = line:find('%]', col + 1)
+    local paren_index = line:find('%]', col + 1)
 
-    if not paren_i then
+    if paren_index == nil then
         return false
     end
 
-    vim.api.nvim_win_set_cursor(win, { pos[1], paren_i })
+    vim.api.nvim_win_set_cursor(win, { pos[1], paren_index })
+    return true
 end
 
-local function is_between_brackets()
-    local col = vim.api.nvim_win_get_cursor(vim.api.nvim_get_current_win())[2]
-    local line = vim.api.nvim_get_current_line()
-
+---@param line string
+---@param col integer
+---@return boolean
+local function is_between_brackets(line, col)
     ---@type integer[]
     local bitmask = {}
 
@@ -77,15 +79,18 @@ function Utils.is_heading(text)
 end
 
 ---@param heading_id string should include the `#` i.e. use `#my-heading` not `my-heading`
+---@param win integer
 ---@return boolean if finding the heading was successful
-function Utils.go_to_heading(heading_id)
+function Utils.go_to_heading(heading_id, win)
     heading_id = heading_id:sub(2)
 
-    local headings = Utils.get_all_headings()
+    local buf = vim.api.nvim_win_get_buf(win)
+    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+
+    local headings = Utils.get_all_headings(lines)
 
     for _, val in ipairs(headings) do
         if to_letters(val.heading) == to_letters(heading_id) then
-            local win = vim.api.nvim_get_current_win()
             vim.api.nvim_win_set_cursor(win, { val.linenr, 0 })
 
             return true
@@ -95,11 +100,14 @@ function Utils.go_to_heading(heading_id)
     return false
 end
 
-function Utils.get_all_headings()
-    local buf = vim.api.nvim_get_current_buf()
-    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+---@class Heading
+---@field heading string
+---@field linenr integer
 
-    ---@type { heading: string, linenr: integer }[]
+---@param lines string[]
+---@return Heading[]
+function Utils.get_all_headings(lines)
+    ---@type Heading[]
     local headings = {}
 
     for linenr, line in ipairs(lines) do
@@ -118,11 +126,13 @@ function Utils.get_all_headings()
 end
 
 ---@param path string
+---@return boolean
 function Utils.is_url(path)
     return path:sub(1, 4) == 'http'
 end
 
 ---@param path string
+---@return boolean
 function Utils.file_exists(path)
     local file = io.open(path, 'r')
     local exists = file ~= nil
@@ -132,10 +142,14 @@ function Utils.file_exists(path)
     return exists
 end
 
---Returns `true` if finding a link was successful, otherwise `false`
-function Utils.go_to_markdown_link()
-    if is_between_brackets() then
-        return go_to_parenthesis()
+---@param win integer
+---@return boolean found_link if finding a link was successful
+function Utils.go_to_markdown_link(win)
+    local line = vim.api.nvim_get_current_line()
+    local pos = vim.api.nvim_win_get_cursor(win)
+
+    if is_between_brackets(line, pos[2]) then
+        return go_to_parenthesis(line, win, pos)
     end
 
     return false
@@ -176,14 +190,16 @@ function Utils.open_in_browser(link)
     vim.fn.jobstart(cmd)
 end
 
-function Utils.is_on_checkbox()
-    local line = vim.api.nvim_get_current_line()
+---@param line string
+---@return boolean
+function Utils.is_on_checkbox(line)
     return line:sub(1, 3) == '- [' and line:sub(5, 5) == ']'
 end
 
-function Utils.checkbox_is_checked()
-    local line = vim.api.nvim_get_current_line()
-    return Utils.is_on_checkbox() and line:sub(1, 5) == '- [x]'
+---@param line string
+---@return boolean
+function Utils.checkbox_is_checked(line)
+    return Utils.is_on_checkbox(line) and line:sub(1, 5) == '- [x]'
 end
 
 ---@param keys string
@@ -192,11 +208,13 @@ local function input(keys)
 end
 
 function Utils.toggle_checkbox()
-    if not Utils.is_on_checkbox() then
+    local line = vim.api.nvim_get_current_line()
+
+    if not Utils.is_on_checkbox(line) then
         return
     end
 
-    if Utils.checkbox_is_checked() then
+    if Utils.checkbox_is_checked(line) then
         input 'mz_f[lr `z'
     else
         input 'mz_f[lrx`z'
