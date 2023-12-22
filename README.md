@@ -11,7 +11,7 @@ Traverse your wiki with one command
 - [x] Navigate while on any part of the Markdown link
 - [x] [Toggle Markdown checkboxes](#toggle-checkboxes)
 - [x] Navigate Markdown Section links
-- [ ] Navigate Markdown Reference links
+- [x] Navigate Markdown Reference links
 
 ## 📦 Install
 
@@ -43,7 +43,7 @@ local utils = require 'traverse.utils'
 
 ### Toggle Checkboxes
 
-`utils.toggle_checkbox()` will toggle a markdown checkbox on the current line if
+`utils.checkbox.toggle()` will toggle a markdown checkbox on the current line if
 there is one.
 
 ## Options
