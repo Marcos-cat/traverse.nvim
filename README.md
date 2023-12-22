@@ -1,4 +1,6 @@
-# traverse.nvim
+<!-- Link to this GitHub page: [The GitHub](https://github.com/Marcos-cat/traverse.nvim) -->
+
+# ↕️ traverse.nvim
 
 Traverse your wiki with one command
 
