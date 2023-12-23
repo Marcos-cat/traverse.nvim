@@ -1,19 +1,11 @@
 local Helpers = {}
 
----@param str string
 function Helpers.to_letters(str)
-    return str:gsub('%A', ''):lower()
+    return tostring(str):gsub('%A', ''):lower()
 end
 
----@param arr integer[]
-function Helpers.scanadd(arr)
-    for i, val in ipairs(arr) do
-        if i ~= 1 then
-            arr[i] = val + arr[i - 1]
-        end
-    end
-
-    return arr
+function Helpers.to_letters_eq(a, b)
+    return Helpers.to_letters(a) == Helpers.to_letters(b)
 end
 
 return Helpers

@@ -57,13 +57,10 @@ function Traverse.traverse()
     local reference_pattern = '%[.-%]%[%s*(%S*)%s*.-%]'
     local _, tag = Utils.is_on_pattern(line, col, reference_pattern)
 
-    if tag then
-        for _, reference in ipairs(Utils.get_all_references(win)) do
-            if reference.tag == tag then
-                Traverse.try_link(reference.link)
-                return
-            end
-        end
+    local link = Utils.get_reference_link(win, tag or '')
+    if link then
+        Traverse.try_link(link)
+        return
     end
 
     Traverse.try_link(Utils.get_cursor_file())

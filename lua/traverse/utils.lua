@@ -2,9 +2,8 @@ local Opts = require('traverse.options').get()
 
 local Utils = {}
 
-local helpers = require 'traverse.utils.helpers'
-local to_letters = helpers.to_letters
 Utils.checkbox = require 'traverse.utils.checkbox'
+local to_letters_eq = require('traverse.utils.helpers').to_letters_eq
 
 ---@param win integer
 function Utils.all_lines(win)
@@ -13,26 +12,22 @@ function Utils.all_lines(win)
     return lines
 end
 
----@class Reference
----@field link string
----@field tag string
-
 ---@param win integer
-function Utils.get_all_references(win)
-    local lines = Utils.all_lines(win)
-
-    ---@type Reference[]
-    local references = {}
-    references.insert = table.insert
-
-    for _, line in ipairs(lines) do
-        local _, _, tag, link = line:find '^%[(.-)%]: (%S+)'
-        if tag and link then
-            references:insert { tag = tag, link = link }
-        end
+---@param tag string
+---@return string?
+function Utils.get_reference_link(win, tag)
+    if not tag or tag == '' then
+        return
     end
 
-    return references
+    local lines = Utils.all_lines(win)
+
+    for _, line in ipairs(lines) do
+        local _, _, reference_tag, link = line:find '^%[(.-)%]: (%S+)'
+        if reference_tag == tag then
+            return tostring(link)
+        end
+    end
 end
 
 ---@param line string
@@ -75,38 +70,29 @@ function Utils.go_to_heading(heading_id, win)
     heading_id = heading_id:sub(2)
 
     local lines = Utils.all_lines(win)
-    local headings = Utils.get_all_headings(lines)
-
-    for _, heading in ipairs(headings) do
-        if to_letters(heading.text) == to_letters(heading_id) then
-            vim.api.nvim_win_set_cursor(win, { heading.linenr, 0 })
-
-            return true
-        end
+    local linenr = Utils.get_heading_linenr(lines, heading_id)
+    if linenr then
+        vim.api.nvim_win_set_cursor(win, { linenr, 0 })
+        return true
     end
 
     return false
 end
 
----@class Heading
----@field text string
----@field linenr integer
-
 ---@param lines string[]
-function Utils.get_all_headings(lines)
-    ---@type Heading[]
-    local headings = {}
-    headings.insert = table.insert
-
-    for linenr, line in ipairs(lines) do
-        local text = select(3, line:find '^#+ (.*)$')
-
-        if text then
-            headings:insert { text = text, linenr = linenr }
-        end
+---@param heading_text string
+function Utils.get_heading_linenr(lines, heading_text)
+    if not heading_text or heading_text == '' then
+        return
     end
 
-    return headings
+    for linenr, line in ipairs(lines) do
+        local _, _, text = line:find '^#+ (.*)$'
+
+        if to_letters_eq(text, heading_text) then
+            return linenr
+        end
+    end
 end
 
 ---@param path string
